@@ -61,7 +61,7 @@ export class Shop {
   @Column({ default: 0 })
   totalProducts: number;
 
-  @ManyToOne(() => User, (user) => user.id, {
+  @ManyToOne(() => User, (user) => user.userId, {
     onDelete: 'CASCADE',
     eager: true,
   })

@@ -11,6 +11,7 @@ import { ProductGroup } from './entities/product-group.entity';
 import { ProductTag } from './entities/product-tag.entity';
 import { Product } from './entities/product.entity';
 import { FilterProductDto } from './dtos/filter-product.dto';
+import { ProductVariation } from './entities/product-variation.entity';
 
 @Injectable()
 export class ProductService {
@@ -32,6 +33,8 @@ export class ProductService {
 
     @InjectRepository(ProductTag)
     private productTagRepository: Repository<ProductTag>,
+    @InjectRepository(ProductVariation)
+    private readonly productVariationRepository: Repository<ProductVariation>,
   ) {}
 
   // Get all products based on the user's shop
@@ -41,7 +44,7 @@ export class ProductService {
     }
 
     const shop = await this.shopRepository.findOne({
-      where: { user: { id: user.id } },
+      where: { user: { userId: user.userId } },
     });
 
     if (!shop) {
@@ -64,7 +67,10 @@ export class ProductService {
       throw new NotFoundException('Product not found');
     }
 
-    if (user.role !== 'super_admin' && product.shop.user.id !== user.id) {
+    if (
+      user.role !== 'super_admin' &&
+      product.shop.user.userId !== user.userId
+    ) {
       throw new NotFoundException(
         'You do not have permission to access this product',
       );
@@ -81,7 +87,7 @@ export class ProductService {
     let shop = null;
     if (user.role !== 'super_admin') {
       shop = await this.shopRepository.findOne({
-        where: { user: { id: user.id } },
+        where: { user: { userId: user.userId } },
       });
 
       if (!shop) {
@@ -94,9 +100,11 @@ export class ProductService {
       productGroupId,
       manufacturerId,
       productTagId,
+      variations,
       ...rest
     } = createProductDto;
 
+    // Fetch related entities
     const category = await this.categoryRepository.findOne({
       where: { id: categoryId },
     });
@@ -110,6 +118,7 @@ export class ProductService {
       where: { id: productTagId },
     });
 
+    // Create the product
     const product = this.productRepository.create({
       ...rest,
       shop,
@@ -119,7 +128,23 @@ export class ProductService {
       productTag,
     });
 
-    return this.productRepository.save(product);
+    // Save the product to generate product ID
+    const savedProduct = await this.productRepository.save(product);
+
+    // Handle product variations if they exist
+    if (variations && variations.length > 0) {
+      const productVariations = variations.map((variation) => {
+        return this.productVariationRepository.create({
+          ...variation,
+          product: savedProduct, // Link the variation to the product
+        });
+      });
+
+      // Save product variations
+      await this.productVariationRepository.save(productVariations);
+    }
+
+    return savedProduct;
   }
 
   // Update an existing product
@@ -128,6 +153,7 @@ export class ProductService {
     id: string,
     updateProductDto: UpdateProductDto,
   ): Promise<Product> {
+    // Get the product by ID
     const product = await this.getProductById(user, id);
 
     const {
@@ -135,33 +161,74 @@ export class ProductService {
       productGroupId,
       manufacturerId,
       productTagId,
+      variations, // Handle variations separately
       ...updateData
     } = updateProductDto;
 
+    // Update the product's other fields
     if (categoryId) {
-      product.category = await this.categoryRepository.findOne({
+      const category = await this.categoryRepository.findOne({
         where: { id: categoryId },
       });
+      product.category = category;
     }
+
     if (productGroupId) {
-      product.productGroup = await this.productGroupRepository.findOne({
+      const productGroup = await this.productGroupRepository.findOne({
         where: { id: productGroupId },
       });
+      product.productGroup = productGroup;
     }
+
     if (manufacturerId) {
-      product.manufacturer = await this.manufacturerRepository.findOne({
+      const manufacturer = await this.manufacturerRepository.findOne({
         where: { id: manufacturerId },
       });
+      product.manufacturer = manufacturer;
     }
+
     if (productTagId) {
-      product.productTag = await this.productTagRepository.findOne({
+      const productTag = await this.productTagRepository.findOne({
         where: { id: productTagId },
       });
-
-      Object.assign(product, updateData);
-      return this.productRepository.save(product);
+      product.productTag = productTag;
     }
+
+    // Update other product fields (name, price, etc.)
+    Object.assign(product, updateData);
+
+    // Save the product
+    const updatedProduct = await this.productRepository.save(product);
+
+    // If variations are included in the update request
+    if (variations && variations.length > 0) {
+      // Update each variation
+      for (const variation of variations) {
+        // Find the variation by ID
+        const existingVariation = await this.productVariationRepository.findOne(
+          {
+            where: { id: variation.id, product: product },
+          },
+        );
+
+        if (existingVariation) {
+          // Update the existing variation with the new data
+          Object.assign(existingVariation, variation);
+          await this.productVariationRepository.save(existingVariation);
+        } else {
+          // If the variation doesn't exist, create a new one
+          const newVariation = this.productVariationRepository.create({
+            ...variation,
+            product: updatedProduct,
+          });
+          await this.productVariationRepository.save(newVariation);
+        }
+      }
+    }
+
+    return updatedProduct;
   }
+
   // Delete product
   async deleteProduct(user: User, id: string): Promise<void> {
     const product = await this.getProductById(user, id);

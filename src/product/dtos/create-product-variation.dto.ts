@@ -9,6 +9,13 @@ import {
 
 export class ProductVariationDto {
   @ApiProperty({
+    description: 'The unique identifier for the product variation',
+  })
+  @IsString()
+  @IsOptional() // This will be used when updating an existing variation
+  id?: string; // ID field to allow the update operation
+
+  @ApiProperty({
     description: 'The size of the product variation',
     example: 'Medium',
   })

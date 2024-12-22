@@ -23,7 +23,7 @@ export class ProductGroupService {
 
     // Get the shop associated with the current user
     const shop = await this.shopRepository.findOne({
-      where: { user: { id: user.id } },
+      where: { user: { userId: user.userId } },
     });
 
     if (!shop) {
@@ -47,7 +47,10 @@ export class ProductGroupService {
       throw new NotFoundException('Product Group not found');
     }
 
-    if (user.role !== 'super_admin' && productGroup.shop.user.id !== user.id) {
+    if (
+      user.role !== 'super_admin' &&
+      productGroup.shop.user.userId !== user.userId
+    ) {
       throw new NotFoundException(
         'You do not have permission to access this product group',
       );
@@ -61,7 +64,7 @@ export class ProductGroupService {
     let shop = null;
     if (user.role !== 'super_admin') {
       shop = await this.shopRepository.findOne({
-        where: { user: { id: user.id } },
+        where: { user: { userId: user.userId } },
       });
 
       if (!shop) {

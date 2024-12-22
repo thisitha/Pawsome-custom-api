@@ -5,7 +5,9 @@ import {
   IsNumber,
   IsBoolean,
   IsDateString,
+  IsArray,
 } from 'class-validator';
+import { ProductVariationDto } from './create-product-variation.dto';
 
 export class UpdateProductDto {
   @ApiProperty({
@@ -104,4 +106,13 @@ export class UpdateProductDto {
   @IsOptional()
   @IsNumber()
   shopId?: string;
+
+  @ApiProperty({
+    description: 'The variations of the product',
+    type: [ProductVariationDto],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  variations?: ProductVariationDto[];
 }

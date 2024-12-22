@@ -18,6 +18,7 @@ export class ShopService {
   ) {}
 
   async createShop(createShopDto: CreateShopDto, user: User): Promise<Shop> {
+    console.log(user);
     const existingShop = await this.shopRepository.findOne({ where: { user } });
 
     if (existingShop) {
@@ -67,7 +68,7 @@ export class ShopService {
     } else {
       // Otherwise, return only the shops assigned to the specific user
       return this.shopRepository.find({
-        where: { user: { id: user.id } },
+        where: { user: { userId: user.userId } },
       });
     }
   }

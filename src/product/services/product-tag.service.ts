@@ -23,7 +23,7 @@ export class ProductTagService {
 
     // Get the shop associated with the current user
     const shop = await this.shopRepository.findOne({
-      where: { user: { id: user.id } },
+      where: { user: { userId: user.userId } },
     });
 
     if (!shop) {
@@ -47,7 +47,10 @@ export class ProductTagService {
       throw new NotFoundException('Product Tag not found');
     }
 
-    if (user.role !== 'super_admin' && productTag.shop.user.id !== user.id) {
+    if (
+      user.role !== 'super_admin' &&
+      productTag.shop.user.userId !== user.userId
+    ) {
       throw new NotFoundException(
         'You do not have permission to access this product tag',
       );
@@ -61,7 +64,7 @@ export class ProductTagService {
     let shop = null;
     if (user.role !== 'super_admin') {
       shop = await this.shopRepository.findOne({
-        where: { user: { id: user.id } },
+        where: { user: { userId: user.userId } },
       });
 
       if (!shop) {

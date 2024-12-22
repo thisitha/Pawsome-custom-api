@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsString,
   IsEmail,
-  IsPhoneNumber,
   IsBoolean,
   IsNumber,
 } from 'class-validator';
@@ -57,7 +56,6 @@ export class CreateShopDto {
 
   @ApiProperty({ example: '+1234567890', required: false })
   @IsOptional()
-  @IsPhoneNumber(null)
   phoneNumber?: string;
 
   @ApiProperty({ example: true, required: false })

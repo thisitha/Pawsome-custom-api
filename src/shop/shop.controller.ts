@@ -23,7 +23,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 @Controller('shops')
 export class ShopController {
   constructor(private readonly shopService: ShopService) {}
-
+  @ApiBearerAuth()
   @Post()
   async createShop(
     @Body() createShopDto: CreateShopDto,
@@ -50,7 +50,7 @@ export class ShopController {
   async deleteShop(@Param('id') id: string, @GetUser() user: User) {
     return this.shopService.deleteShop(id, user);
   }
-
+  @ApiBearerAuth()
   @Get()
   async getAllShops(@GetUser() user: User) {
     return this.shopService.getAllShopsForUser(user);
