@@ -12,7 +12,12 @@ async function bootstrap() {
       'https://multivendor-seller-remake.vercel.app',
       'https://multivendor-remake.vercel.app',
       'https://multivendor-admin-remake.vercel.app',
-      'http://localhost:3000', // Add localhost as allowed origin
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'http://localhost:3003',
+      'http://localhost:3004',
+      'http://localhost:3005',
     ], // Allow only the specified domains
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Allow all necessary HTTP methods
     allowedHeaders: '*',
