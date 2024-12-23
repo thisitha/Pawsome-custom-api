@@ -39,7 +39,7 @@ export class ProductVariation {
   @Column({ default: true })
   isActive: boolean;
 
-  @ManyToOne(() => Product, (product) => product.variations)
+  @ManyToOne(() => Product, (product) => product.variations, { nullable: true })
   @JoinColumn({ name: 'product_id' })
   product: Product;
 

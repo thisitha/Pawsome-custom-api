@@ -1,57 +1,37 @@
-// import {
-//   Entity,
-//   PrimaryGeneratedColumn,
-//   ManyToOne,
-//   Column,
-//   CreateDateColumn,
-//   UpdateDateColumn,
-// } from 'typeorm';
-// import { Order } from './order.entitiy';
+import { ProductVariation } from 'src/product/entities/product-variation.entity';
+import { Product } from 'src/product/entities/product.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  Column,
+} from 'typeorm';
+import { Order } from './order.entity';
 
-// @Entity('order_items')
-// export class OrderItem {
-//   @PrimaryGeneratedColumn('uuid')
-//   id: string;
+@Entity()
+export class OrderItem {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-//   @ManyToOne(() => Order, (order) => order.orderItems)
-//   order: Order;
+  @ManyToOne(() => Order, (order) => order.items)
+  @JoinColumn({ name: 'orderId' })
+  order: Order;
 
-//   @Column({ type: 'uuid' })
-//   productId: string;
+  @ManyToOne(() => Product)
+  @JoinColumn({ name: 'productId' })
+  product: Product;
 
-//   @Column({ type: 'uuid' })
-//   shopId: string;
+  @ManyToOne(() => ProductVariation)
+  @JoinColumn({ name: 'productVariationId' })
+  productVariation: ProductVariation;
 
-//   @Column('decimal', { precision: 10, scale: 2 })
-//   price: number;
+  @Column({ type: 'integer' })
+  quantity: number;
 
-//   @Column()
-//   quantity: number;
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  price: number;
 
-//   @Column('decimal', { precision: 10, scale: 2 })
-//   total: number;
-
-//   @Column({ nullable: true })
-//   sku: string;
-
-//   @Column({ nullable: true })
-//   productName: string;
-
-//   @Column('simple-json', { nullable: true })
-//   productVariants: Record<string, string>;
-
-//   @CreateDateColumn()
-//   createdAt: Date;
-
-//   @UpdateDateColumn()
-//   updatedAt: Date;
-
-//   @Column({ nullable: true })
-//   createdBy: string;
-
-//   @Column({ nullable: true })
-//   updatedBy: string;
-
-//   @Column({ default: false })
-//   isDeleted: boolean;
-// }
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  total: number;
+}

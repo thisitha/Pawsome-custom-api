@@ -7,6 +7,17 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe());
+  app.enableCors({
+    origin: [
+      'https://multivendor-seller-remake.vercel.app',
+      'https://multivendor-remake.vercel.app',
+      'https://multivendor-admin-remake.vercel.app',
+      'http://localhost:3000', // Add localhost as allowed origin
+    ], // Allow only the specified domains
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], // Allow all necessary HTTP methods
+    allowedHeaders: '*',
+    credentials: true, // Optional: Enable sending credentials (cookies, etc.) if needed
+  });
   const config = new DocumentBuilder()
     .setTitle('Marvel')
     .setDescription('Marvel Mock API')

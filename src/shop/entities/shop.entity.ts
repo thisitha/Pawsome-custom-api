@@ -66,6 +66,7 @@ export class Shop {
     eager: true,
   })
   user: User;
+
   @OneToMany(() => Category, (category) => category.shop, { lazy: true })
   categories: Category[];
 
